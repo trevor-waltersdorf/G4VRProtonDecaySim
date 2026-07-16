@@ -10,6 +10,7 @@
 #include "G4NistManager.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4UnitsTable.hh"
+#include <vector>
 
 class DetectorConstruction : public G4VUserDetectorConstruction {
   public:

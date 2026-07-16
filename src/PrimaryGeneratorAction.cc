@@ -1,11 +1,11 @@
 #include "PrimaryGeneratorAction.hh"
 
 PrimaryGeneratorAction::PrimaryGeneratorAction() {
-	fParticleGun = new G4ParticleGun(1);
+	fParticleSource = new G4ParticleGun(1);
 }
 
 PrimaryGeneratorAction::~PrimaryGeneratorAction() {
-	delete fParticleGun;
+	delete fParticleSource;
 }
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
@@ -32,14 +32,14 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
 	G4ThreeVector mom(p * nx, p * ny, p * nz);
 
 	// Generate Neutral Pion
-	fParticleGun->SetParticleDefinition(pi0);
-	fParticleGun->SetParticlePosition(pos);
-	fParticleGun->SetParticleMomentum(mom);
-	fParticleGun->GeneratePrimaryVertex(event);
+	fParticleSource->SetParticleDefinition(pi0);
+	fParticleSource->SetParticlePosition(pos);
+	fParticleSource->SetParticleMomentum(mom);
+	fParticleSource->GeneratePrimaryVertex(event);
 	
 	// Generate Positron
-	fParticleGun->SetParticleDefinition(positron);
-	fParticleGun->SetParticlePosition(pos);
-	fParticleGun->SetParticleMomentum(-mom);
-	fParticleGun->GeneratePrimaryVertex(event);
+	fParticleSource->SetParticleDefinition(positron);
+	fParticleSource->SetParticlePosition(pos);
+	fParticleSource->SetParticleMomentum(-mom);
+	fParticleSource->GeneratePrimaryVertex(event);
 }
