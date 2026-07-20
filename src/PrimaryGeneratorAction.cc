@@ -43,3 +43,4 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
 	fParticleSource->SetParticleMomentum(-mom);
 	fParticleSource->GeneratePrimaryVertex(event);
 }
+

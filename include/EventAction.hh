@@ -4,6 +4,11 @@
 #include "G4UserEventAction.hh"
 #include "globals.hh"
 #include "RunAction.hh"
+#include "G4SDManager.hh"
+#include "PHit.hh"
+
+#include <iostream>
+#include <fstream>
 
 class G4Event;
 class RunAction;
