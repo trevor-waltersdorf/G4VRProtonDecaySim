@@ -31,17 +31,26 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 
 	G4VPhysicalVolume* worldPhys = new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), worldLog, "physWorld", 0, false, checkOverlaps);
 
-	// Initialize One Detector
+	// Initialize Detectors
 	G4double det_hx = 0.5 * cm;
 	G4double det_hy = 2.4 * m;
 	G4double det_hz = 2.4 * m;
 	G4double margin = 5.0 * cm;
-	G4double detPosX = world_hx - det_hx - margin;
+	G4double detPos = world_hx - det_hx - margin;
+	G4RotationMatrix* yRotM = new G4RotationMatrix();
+	yRotM->rotateZ(90. * deg);
+	G4RotationMatrix* zRotM = new G4RotationMatrix();
+	zRotM->rotateY(90. * deg);
 
 	G4Box* detBox = new G4Box("solidDetector", det_hx, det_hy, det_hz);
 	G4LogicalVolume* detLog = new G4LogicalVolume(detBox, detMat, "logicDetector");
 	logicDetector = detLog;
-	new G4PVPlacement(0, G4ThreeVector(detPosX, 0, 0), detLog, "physDetector", worldLog, false, 0, checkOverlaps);
+	new G4PVPlacement(0, G4ThreeVector(detPos, 0, 0), detLog, "physDetectorXPos", worldLog, false, 0, checkOverlaps);
+	new G4PVPlacement(0, G4ThreeVector(-detPos, 0, 0), detLog, "physDetectorXNeg", worldLog, false, 1, checkOverlaps);
+	new G4PVPlacement(yRotM, G4ThreeVector(0, detPos, 0), detLog, "physDetectorYPos", worldLog, false, 2, checkOverlaps);
+	new G4PVPlacement(yRotM, G4ThreeVector(0, -detPos, 0), detLog, "physDetectorYPos", worldLog, false, 3, checkOverlaps);
+	new G4PVPlacement(zRotM, G4ThreeVector(0, 0, detPos), detLog, "physDetectorZPos", worldLog, false, 4, checkOverlaps);
+	new G4PVPlacement(zRotM, G4ThreeVector(0, 0, -detPos), detLog, "physDetectorZPos", worldLog, false, 5, checkOverlaps);
 	
 	G4VisAttributes* detVisAtt = new G4VisAttributes(G4Color(0.8, 0.8, 0.0, 0.5));
 	detVisAtt->SetForceSolid(true);

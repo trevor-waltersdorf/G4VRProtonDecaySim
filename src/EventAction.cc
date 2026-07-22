@@ -13,7 +13,6 @@ void EventAction::EndOfEventAction(const G4Event* event) {
 	
 	//Save each hit to csv
 	std::ofstream Output("output.csv");
-	Output << "Photon #,Edep,X Pos,Y Pos,Z Pos" << std::endl;
 
 	G4int numHits = hc->entries();
 	for (G4int i = 0; i < numHits; i++) {
@@ -21,8 +20,14 @@ void EventAction::EndOfEventAction(const G4Event* event) {
 
 		G4double edep = hit->GetEdep();
 		G4ThreeVector pos = hit->GetPosition();
-		
-		Output << i << "," << edep << "," << pos.x() << "," << pos.y() << "," << pos.z() << std::endl;
+		G4int copyNo = hit->GetCopyNo();
+		// Photon #, Copy Number, Energy Deposited, X Position, Y Position, Z Position
+		Output << i << "," 
+			<< copyNo << "," 
+			<< edep << "," 
+			<< pos.x() << "," 
+			<< pos.y() << "," 
+			<< pos.z() << std::endl;
 	}
 
 	Output.close();
