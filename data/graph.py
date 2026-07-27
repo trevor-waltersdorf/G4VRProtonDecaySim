@@ -1,42 +1,22 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
 
-data = np.loadtxt('output.csv', delimiter=',')
-
-fig, axs = plt.subplots(2, 3, figsize=(8,8))
-axs[0, 0].set_title("XPos")
-axs[0, 0].set_xlabel("Y")
-axs[0, 0].set_ylabel("Z")
-axs[1, 0].set_title("XNeg")
-axs[1, 0].set_xlabel("Y")
-axs[1, 0].set_ylabel("Z")
-axs[0, 1].set_title("YPos")
-axs[0, 1].set_xlabel("X")
-axs[0, 1].set_ylabel("Z")
-axs[1, 1].set_title("YNeg")
-axs[1, 1].set_xlabel("X")
-axs[1, 1].set_ylabel("Z")
-axs[0, 2].set_title("ZPos")
-axs[0, 2].set_xlabel("X")
-axs[0, 2].set_ylabel("Y")
-axs[1, 2].set_title("ZNeg")
-axs[1, 2].set_xlabel("X")
-axs[1, 2].set_ylabel("Y")
+file_path = sys.argv[1]
+data = np.loadtxt(file_path, delimiter=',')
+theta = np.array([])
+z = np.array([])
 
 for hit in data:
-    copyNo = hit[1]
-    if (copyNo == 0):
-        axs[0, 0].scatter(hit[4], hit[5], color='red', alpha=0.25)
-    if (copyNo == 1):
-        axs[1, 0].scatter(hit[4], hit[5], color='red', alpha=0.25)
-    if (copyNo == 2):
-        axs[0, 1].scatter(hit[3], hit[5], color='red', alpha=0.25)
-    if (copyNo == 3):
-        axs[1, 1].scatter(hit[3], hit[5], color='red', alpha=0.25)
-    if (copyNo == 4):
-        axs[0, 2].scatter(hit[3], hit[4], color='red', alpha=0.25)
-    if (copyNo == 5):
-        axs[1, 2].scatter(hit[3], hit[4], color='red', alpha=0.25)
+    r = np.sqrt(hit[3] ** 2 + hit[4] ** 2)
+    if (hit[4] >= 0):
+        theta = np.append(theta, np.arccos(hit[3] / r))
+    else:
+        theta = np.append(theta, (np.arccos(-hit[3] / r) + np.pi))
+    z = np.append(z, hit[5])
 
-plt.tight_layout()
+plt.hist2d(theta, z, bins=100)
+plt.title("G4CPDD Run " + file_path[:13])
+plt.xlabel("Angle from +x axis (rad)")
+plt.ylabel("Z Position (mm)")
 plt.show()

@@ -9,6 +9,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <ctime>
+#include <string>
 
 class G4Event;
 class RunAction;
