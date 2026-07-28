@@ -10,7 +10,7 @@ z = np.array([])
 
 for hit in data:
     hitTheta = (hit[1] % 100) * 6
-    hitZ = int(hit[0] / 100) * 110
+    hitZ = int(hit[1] / 100) * 110
     theta = np.append(theta, hitTheta)
     z = np.append(z, hitZ)
 
