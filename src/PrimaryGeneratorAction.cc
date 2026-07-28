@@ -15,7 +15,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
 	G4ParticleDefinition *positron = particleTable->FindParticle("e+");
 
 	// Set position to center of tank
-	G4ThreeVector pos(0., 0., -12.5 * m);
+	G4ThreeVector pos(0., 0., 0.);
 /*
 	// Generate a random world angle and
 	// convert to Cartesian unit vector $\hat{n}$

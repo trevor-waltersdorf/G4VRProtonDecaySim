@@ -45,27 +45,31 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), waterLog, "physWater", worldLog, false, checkOverlaps);
 
 	// Initialize Detectors
-	G4Sphere* detSol = new G4Sphere("solidDetector", 0., 50. * cm, 0., 360. * deg, 0., 360. * deg);
+	G4double det_r = 50. * cm;
+	G4Sphere* detSol = new G4Sphere("solidDetector", 0., det_r, 0., 360. * deg, 0., 360. * deg);
 	G4LogicalVolume* detLog = new G4LogicalVolume(detSol, detMat, "logicDetector");
 	logicDetector = detLog;
 
 	//Place Detectors
 	G4double dAngle = 6. * deg;
-	G4double dHeight = 60. * cm;
-	G4int cN = 0;
+	G4double dHeight = 110. * cm;
+	G4int cNr = 0;
+	G4int cNh = 0;
 	for (G4double z = -tank_hh + (30. * cm); z < tank_hh - (30. * cm); z += dHeight) {
-		for (G4double j = 0; j < 360.; j += dAngle) {
-			G4double x = tank_ir * std::cos(j);
-			G4double y = tank_ir * std::sin(j);
-			new G4PVPlacement(0, G4ThreeVector(x, y, z), detLog, "physDetector", worldLog, false, cN, checkOverlaps);
-			cN += 1;
+		cNr = 0;
+		for (G4double j = 0; j < 360. * deg; j += dAngle) {
+			G4double x = (tank_ir - det_r) * std::cos(j);
+			G4double y = (tank_ir - det_r) * std::sin(j);
+			new G4PVPlacement(0, G4ThreeVector(x, y, z), detLog, "physDetector", waterLog, false, (cNh * 100 + cNr), checkOverlaps);
+			cNr += 1;
 		}
+		cNh += 1;
 	}
 
 	// Set vis attributes
-	G4VisAttributes* waterVisAtt = new G4VisAttributes(G4Color(0., 0.8, 0.8, 0.25));
-	waterVisAtt->SetForceSolid(true);
-	waterLog->SetVisAttributes(waterVisAtt);
+//	G4VisAttributes* waterVisAtt = new G4VisAttributes(G4Color(0., 0.8, 0.8, 0.25));
+//	waterVisAtt->SetForceSolid(true);
+//	waterLog->SetVisAttributes(waterVisAtt);
 	G4VisAttributes* tankVisAtt = new G4VisAttributes(G4Color(0.5, 0.5, 0.5, 0.5));
 	tankVisAtt->SetForceSolid(true);
 	tankLog->SetVisAttributes(tankVisAtt);
