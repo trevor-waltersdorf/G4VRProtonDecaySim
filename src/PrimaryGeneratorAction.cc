@@ -15,21 +15,22 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
 	G4ParticleDefinition *positron = particleTable->FindParticle("e+");
 
 	// Set position to center of tank
+	// TODO set to random
 	G4ThreeVector pos(0., 0., 0.);
-/*
+
 	// Generate a random world angle and
 	// convert to Cartesian unit vector $\hat{n}$
 	G4double phi = G4UniformRand() * 2. * 3.14159265358979323846;
 	G4double cosTheta = (G4UniformRand() - 0.5) * 2.;
 	G4double theta = acosf(cosTheta);
 
-	G4double nx = cosTheta * sinf(phi);
-	G4double ny = sinf(theta) * sinf(phi);
-	G4double nz = cosf(phi);
-*/
+	G4double nx = cosf(phi) * sinf(theta);
+	G4double ny = sinf(phi) * sinf(theta);
+	G4double nz = cosTheta;
+
 	// $|\vec{p}|$ and the final momentum
 	G4double p = 459.426 * MeV;
-	G4ThreeVector mom(p * -1, p * 0, p * 0);
+	G4ThreeVector mom(p * nx, p * ny, p * nz);
 
 	// Generate Neutral Pion
 	fParticleSource->SetParticleDefinition(pi0);
@@ -43,4 +44,3 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
 	fParticleSource->SetParticleMomentum(-mom);
 	fParticleSource->GeneratePrimaryVertex(event);
 }
-

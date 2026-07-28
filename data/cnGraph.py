@@ -14,7 +14,7 @@ for hit in data:
     theta = np.append(theta, hitTheta)
     z = np.append(z, hitZ)
 
-plt.scatter(theta, z, alpha=0.05)
+plt.scatter(theta, z, alpha=0.01)
 plt.title("G4CPDD Run " + dirName)
 plt.xlabel("Angle from +x axis (deg)")
 plt.ylabel("Z Position (cm)")

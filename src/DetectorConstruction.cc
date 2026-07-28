@@ -10,6 +10,8 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	G4Material* tankMat = man->FindOrBuildMaterial("G4_STAINLESS-STEEL");
 	G4Material* detMat = man->FindOrBuildMaterial("G4_Pyrex_Glass");
 
+	// TODO Look into this and see if you can get an actual curve saved
+	// transmission + quantum efficiency
 	std::vector<G4double> photonEnergy = {2.034 * eV, 2.406 * eV, 2.884 * eV, 3.442 * eV};
 	std::vector<G4double> rIndexAir = {1.00, 1.00, 1.00, 1.00};
 	std::vector<G4double> rIndexWater = {1.33, 1.33, 1.34, 1.35};
@@ -31,6 +33,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	G4double tank_ir = 10. * m;
 	G4double tank_or = 10.5 * m;
 	G4double tank_hh = world_hz;
+	G4double det_r = 50. * cm; // TODO should be 25
 
 	G4Box* worldSol = new G4Box("solidWorld", world_hx, world_hy, world_hz);
 	G4LogicalVolume* worldLog = new G4LogicalVolume(worldSol, air, "logicWorld");
@@ -45,7 +48,6 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), waterLog, "physWater", worldLog, false, checkOverlaps);
 
 	// Initialize Detectors
-	G4double det_r = 50. * cm;
 	G4Sphere* detSol = new G4Sphere("solidDetector", 0., det_r, 0., 360. * deg, 0., 360. * deg);
 	G4LogicalVolume* detLog = new G4LogicalVolume(detSol, detMat, "logicDetector");
 	logicDetector = detLog;
