@@ -30,10 +30,10 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	G4double world_hx = 25. * m;
 	G4double world_hy = 25. * m;
 	G4double world_hz = 25. * m;
-	G4double tank_ir = 10. * m;
-	G4double tank_or = 10.5 * m;
+	G4double tank_ir = 16.9 * m;
+	G4double tank_or = 19.4 * m;
 	G4double tank_hh = world_hz;
-	G4double det_r = 50. * cm; // TODO should be 25
+	G4double det_r = 25. * cm;
 
 	G4Box* worldSol = new G4Box("solidWorld", world_hx, world_hy, world_hz);
 	G4LogicalVolume* worldLog = new G4LogicalVolume(worldSol, air, "logicWorld");
@@ -53,8 +53,8 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	logicDetector = detLog;
 
 	//Place Detectors
-	G4double dAngle = 6. * deg;
-	G4double dHeight = 110. * cm;
+	G4double dAngle = 2. * deg;
+	G4double dHeight = 60. * cm;
 	G4int cNr = 0;
 	G4int cNh = 0;
 	for (G4double z = -tank_hh + (30. * cm); z < tank_hh - (30. * cm); z += dHeight) {
