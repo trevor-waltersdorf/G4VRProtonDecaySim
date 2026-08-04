@@ -13,15 +13,15 @@ void RunAction::BeginOfRunAction(const G4Run*) {
 }
 
 void RunAction::EndOfRunAction(const G4Run* run) {
-  G4int nOfEvents = run->GetNumberOfEvent();
-  if (nOfEvents == 0) return;
+  	G4int nOfEvents = run->GetNumberOfEvent();
+  	if (nOfEvents == 0) return;
 
-  G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
-  accumulableManager->Merge();
+  	G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
+	accumulableManager->Merge();
 
-  G4double edep = fEdep.GetValue();
+  	G4double edep = fEdep.GetValue();
 }
 
 void RunAction::AddEdep(G4double edep) {
-  fEdep += edep;
+	fEdep += edep;
 }

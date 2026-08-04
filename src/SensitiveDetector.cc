@@ -1,7 +1,7 @@
 #include "SensitiveDetector.hh"
 
 SensitiveDetector::SensitiveDetector(G4String name) : G4VSensitiveDetector(name) {
-	collectionName.insert("TestHitCollection");
+	collectionName.insert("HitCollection");
 }
 
 G4bool SensitiveDetector::ProcessHits(G4Step* step, G4TouchableHistory*) {
@@ -12,15 +12,41 @@ G4bool SensitiveDetector::ProcessHits(G4Step* step, G4TouchableHistory*) {
 		return false;
 	}
 
-	G4StepPoint* preStepPoint = step->GetPreStepPoint();
+	// Get rid of non-boundary interactions
+	G4StepPoint* postStepPoint = step->GetPostStepPoint();
+	if (postStepPoint->GetStepStatus() != fGeomBoundary) {
+		return false;
+	}
 
+	// Cache G4OpBoundaryProcess instance
+	static G4ThreadLocal G4OpBoundaryProcess* boundaryProcess = nullptr;
+	if (!boundaryProcess) {
+		G4ProcessManager* pm = track->GetDefinition()->GetProcessManager();
+		G4ProcessVector* processList = pm->GetProcessList();
+		for (G4int i = 0; i < pm->GetProcessListLength(); ++i) {
+			if ((*processList)[i]->GetProcessName() == "OpBoundary") {
+				boundaryProcess = static_cast<G4OpBoundaryProcess*>((*processList)[i]);
+				break;
+			}
+		}
+	}
+
+	// Only keep "detection" resultant hits
+	if (!boundaryProcess || boundaryProcess->GetStatus() != Detection) {
+		return false;
+	}
+
+	// Record the hit as happening in the glass to keep a unique copy number
+	G4StepPoint* preStepPoint = step->GetPreStepPoint();
+	G4int copyNo = preStepPoint->GetTouchableHandle()->GetVolume()->GetCopyNo();
+	
 	PHit* hit = new PHit();
-	hit->SetPosition(preStepPoint->GetPosition());
-	hit->SetEdep(preStepPoint->GetKineticEnergy());
-	hit->SetCopyNo(preStepPoint->GetTouchableHandle()->GetVolume()->GetCopyNo());
+	hit->SetPosition(postStepPoint->GetPosition()); // Give it position on the boundary
+	hit->SetEdep(postStepPoint->GetKineticEnergy());
+	hit->SetCopyNo(copyNo);
 	hitCollection->insert(hit);
 
-	// Kill photon
+	// Kill photon (optional but helps me sleep)
 	track->SetTrackStatus(fStopAndKill);
 
 	return true;

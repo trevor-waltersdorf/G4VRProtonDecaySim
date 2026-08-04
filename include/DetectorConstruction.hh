@@ -16,6 +16,10 @@
 #include "G4SystemOfUnits.hh"
 #include "G4UnitsTable.hh"
 
+#include "G4MaterialPropertiesTable.hh"
+#include "G4OpticalSurface.hh"
+#include "G4LogicalSkinSurface.hh"
+
 #include "G4VisAttributes.hh"
 #include "G4Color.hh"
 
@@ -32,7 +36,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
 
 		G4VPhysicalVolume* Construct() override;
 	private:
-		G4LogicalVolume* logicDetector = nullptr;
+		G4LogicalVolume* logicGlass = nullptr;
 		virtual void ConstructSDandField();
 };
 

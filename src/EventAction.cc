@@ -8,7 +8,7 @@ void EventAction::BeginOfEventAction(const G4Event*) {
 
 void EventAction::EndOfEventAction(const G4Event* event) {
 	fRunAction->AddEdep(fEdep);
-	G4int hcID = G4SDManager::GetSDMpointer()->GetCollectionID("SensitiveDetector/TestHitCollection");
+	G4int hcID = G4SDManager::GetSDMpointer()->GetCollectionID("SensitiveDetector/HitCollection");
 	auto hc = static_cast<HitCollection*>(event->GetHCofThisEvent()->GetHC(hcID));
 	
 	//Save each hit to csv
@@ -23,6 +23,11 @@ void EventAction::EndOfEventAction(const G4Event* event) {
 	std::filesystem::path filePath = dirPath / fileName;
 	std::filesystem::create_directories(dirPath);
 	std::ofstream Output(filePath);
+
+	// Print proton state and opening angle to a csv
+	std::ofstream RunInfo("../data/runInfo.csv", std::ios::app);
+	RunInfo << isFreeProton << "," << openAng << std::endl;
+	RunInfo.close();
 
 	G4int numHits = hc->entries();
 	for (G4int i = 0; i < numHits; i++) {

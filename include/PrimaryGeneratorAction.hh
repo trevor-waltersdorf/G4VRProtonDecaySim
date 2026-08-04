@@ -7,18 +7,23 @@
 #include "G4ParticleGun.hh"
 #include "G4ParticleTable.hh"
 #include "G4SystemOfUnits.hh"
+#include "G4LorentzVector.hh"
+#include "G4ThreeVector.hh"
 #include "Randomize.hh"
 #include <cmath>
 
+class EventAction;
+
 class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction {
   public:
-    PrimaryGeneratorAction();
+    PrimaryGeneratorAction(EventAction* eventAction);
     ~PrimaryGeneratorAction() override;
 
     virtual void GeneratePrimaries(G4Event* event);
 
   private:
     G4ParticleGun* fParticleSource;
+    EventAction* fEventAction;
 };
 
 #endif

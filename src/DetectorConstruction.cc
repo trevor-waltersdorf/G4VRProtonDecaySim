@@ -7,11 +7,10 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	G4NistManager* man = G4NistManager::Instance();
 	G4Material* air = man->FindOrBuildMaterial("G4_AIR");
 	G4Material* water = man->FindOrBuildMaterial("G4_WATER");
+	G4Material* vacuum = man->FindOrBuildMaterial("G4_Galactic");
 	G4Material* tankMat = man->FindOrBuildMaterial("G4_STAINLESS-STEEL");
 	G4Material* detMat = man->FindOrBuildMaterial("G4_Pyrex_Glass");
 
-	// TODO Look into this and see if you can get an actual curve saved
-	// transmission + quantum efficiency
 	std::vector<G4double> photonEnergy = {2.034 * eV, 2.406 * eV, 2.884 * eV, 3.442 * eV};
 	std::vector<G4double> rIndexAir = {1.00, 1.00, 1.00, 1.00};
 	std::vector<G4double> rIndexWater = {1.33, 1.33, 1.34, 1.35};
@@ -33,7 +32,6 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	G4double tank_ir = 16.9 * m;
 	G4double tank_or = 19.4 * m;
 	G4double tank_hh = world_hz;
-	G4double det_r = 25. * cm;
 
 	G4Box* worldSol = new G4Box("solidWorld", world_hx, world_hy, world_hz);
 	G4LogicalVolume* worldLog = new G4LogicalVolume(worldSol, air, "logicWorld");
@@ -48,9 +46,36 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), waterLog, "physWater", worldLog, false, checkOverlaps);
 
 	// Initialize Detectors
-	G4Sphere* detSol = new G4Sphere("solidDetector", 0., det_r, 0., 360. * deg, 0., 360. * deg);
-	G4LogicalVolume* detLog = new G4LogicalVolume(detSol, detMat, "logicDetector");
-	logicDetector = detLog;
+	G4double det_r = 25. * cm;
+	G4double det_wall = 2. * cm;
+	G4double vac_r = det_r - det_wall;
+
+	// Create glass sphere
+	G4Sphere* glassSol = new G4Sphere("solidGlassPMT", 0., det_r, 0., 360. * deg, 0., 360. * deg);
+	G4LogicalVolume* glassLog = new G4LogicalVolume(glassSol, detMat, "logicGlassPMT");
+	logicGlass = glassLog;
+
+	// Create vacuum inside PMT
+	G4Sphere* vacSol = new G4Sphere("solidVacuumPMT", 0., vac_r, 0., 360. * deg, 0., 360. * deg);
+	G4LogicalVolume* vacLog = new G4LogicalVolume(vacSol, vacuum, "logicVacuumPMT");
+	new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), vacLog, "physVacuumPMT", glassLog, false, 0, checkOverlaps);
+
+	// Create photocathode on glass-vacuum boundary
+	G4OpticalSurface* pmtOpSurf = new G4OpticalSurface("PhotocathodeSurface");
+	pmtOpSurf->SetType(dielectric_metal);
+	pmtOpSurf->SetModel(unified);
+	pmtOpSurf->SetFinish(polished);
+
+	// Set reflecitivy and efficiency TODO: swap in real numbers from Hamamatsu datasheet or WCSim
+	std::vector<G4double> pmtReflectivity = {0., 0., 0., 0.};
+	std::vector<G4double> pmtEfficiency = {0.02, 0.20, 0.25, 0.15};
+
+	auto mptPMT = new G4MaterialPropertiesTable();
+	mptPMT->AddProperty("REFLECTIVITY", photonEnergy, pmtReflectivity);
+	mptPMT->AddProperty("EFFICIENCY", photonEnergy, pmtEfficiency);
+	pmtOpSurf->SetMaterialPropertiesTable(mptPMT);
+
+	new G4LogicalSkinSurface("PhotocathodeSkin", vacLog, pmtOpSurf);
 
 	//Place Detectors
 	G4double dAngle = 2. * deg;
@@ -62,7 +87,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 		for (G4double j = 0; j < 360. * deg; j += dAngle) {
 			G4double x = (tank_ir - det_r) * std::cos(j);
 			G4double y = (tank_ir - det_r) * std::sin(j);
-			new G4PVPlacement(0, G4ThreeVector(x, y, z), detLog, "physDetector", waterLog, false, (cNh * 100 + cNr), checkOverlaps);
+			new G4PVPlacement(0, G4ThreeVector(x, y, z), glassLog, "physDetector", waterLog, false, (cNh * 1000 + cNr), checkOverlaps);
 			cNr += 1;
 		}
 		cNh += 1;
@@ -77,12 +102,12 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	tankLog->SetVisAttributes(tankVisAtt);
 	G4VisAttributes* detVisAtt = new G4VisAttributes(G4Color(0.8, 0.8, 0., 0.5));
 	detVisAtt->SetForceSolid(true);
-	detLog->SetVisAttributes(detVisAtt);
+	glassLog->SetVisAttributes(detVisAtt);
 
 	return worldPhys;
 }
 void DetectorConstruction::ConstructSDandField() {
 	SensitiveDetector* sensDet = new SensitiveDetector("SensitiveDetector");
-	logicDetector->SetSensitiveDetector(sensDet);
+	logicGlass->SetSensitiveDetector(sensDet);
 	G4SDManager::GetSDMpointer()->AddNewDetector(sensDet);
 }

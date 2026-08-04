@@ -2,6 +2,7 @@
 #define EVENT_ACTION_H
 
 #include "G4UserEventAction.hh"
+#include "Randomize.hh"
 #include "globals.hh"
 #include "RunAction.hh"
 #include "G4SDManager.hh"
@@ -26,10 +27,14 @@ class EventAction : public G4UserEventAction
     void EndOfEventAction(const G4Event* event) override;
 
     void AddEdep(G4double edep) { fEdep += edep; }
+    void SetIsFreeProton(G4bool ifp) { isFreeProton = ifp; }
+    void SetOpenAngle(G4double oa) { openAng = oa; }
 
   private:
     RunAction* fRunAction = nullptr;
     G4double fEdep = 0.;
+    G4bool isFreeProton = true;
+    G4double openAng = 0.;
 };
 
 #endif

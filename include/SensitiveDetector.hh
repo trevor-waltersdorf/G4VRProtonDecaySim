@@ -9,6 +9,8 @@
 #include "G4Step.hh"
 #include "G4Track.hh"
 #include "G4SDManager.hh"
+#include "G4OpBoundaryProcess.hh"
+#include "G4ProcessManager.hh"
 
 #include "PHit.hh"
 
