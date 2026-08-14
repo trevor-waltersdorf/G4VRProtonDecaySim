@@ -7,16 +7,21 @@ void EventAction::BeginOfEventAction(const G4Event*) {
 }
 
 void EventAction::EndOfEventAction(const G4Event* event) {
+	// Add edep to run total
 	fRunAction->AddEdep(fEdep);
+
+	// Get hit collection
 	G4int hcID = G4SDManager::GetSDMpointer()->GetCollectionID("SensitiveDetector/HitCollection");
 	auto hc = static_cast<HitCollection*>(event->GetHCofThisEvent()->GetHC(hcID));
 	
-	//Save each hit to csv
+//Save each hit to csv
+	// Get current date and time
 	std::time_t now = std::time(nullptr);
     	std::tm* localTime = std::localtime(&now);
     	char buffer[16];
     	std::strftime(buffer, sizeof(buffer), "%Y%m%d%H%M%S", localTime);
 
+	// Set name of run to YYMMDDHHMMSS format
 	std::string runName(buffer);
 	std::string fileName = runName + ".csv";
 	std::filesystem::path dirPath("../data/" + runName);
@@ -24,11 +29,13 @@ void EventAction::EndOfEventAction(const G4Event* event) {
 	std::filesystem::create_directories(dirPath);
 	std::ofstream Output(filePath);
 
-	// Print proton state and opening angle to a csv
+	// Append proton state and opening angle to runInfo.csv
+	// for analysis of many runs
 	std::ofstream RunInfo("../data/runInfo.csv", std::ios::app);
 	RunInfo << isFreeProton << "," << openAng << std::endl;
 	RunInfo.close();
 
+	// Print hit attributes to the csv file
 	G4int numHits = hc->entries();
 	for (G4int i = 0; i < numHits; i++) {
 		PHit* hit = (*hc)[i];
