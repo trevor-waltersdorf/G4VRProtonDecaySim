@@ -27,6 +27,7 @@
 
 #include "G4SDManager.hh"
 #include "SensitiveDetector.hh"
+#include "PMTConstruction.hh"
 
 #include <cmath>
 #include <vector>
@@ -38,7 +39,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
 
 		G4VPhysicalVolume* Construct() override;
 	private:
-		G4LogicalVolume* logicGlass = nullptr;
+		G4LogicalVolume* pmtLog = nullptr;
 		virtual void ConstructSDandField();
 };
 

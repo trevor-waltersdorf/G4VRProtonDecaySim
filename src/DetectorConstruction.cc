@@ -1,17 +1,17 @@
 #include "DetectorConstruction.hh"
 #include "G4ios.hh"
-
 G4VPhysicalVolume *DetectorConstruction::Construct() {
 	G4bool checkOverlaps = false;
   	
 // Define materials & optical properties
-	G4NistManager* man = G4NistManager::Instance();
-	G4Material* air = man->FindOrBuildMaterial("G4_AIR");
-	G4Material* water = man->FindOrBuildMaterial("G4_WATER");
-	G4Material* vacuum = man->FindOrBuildMaterial("G4_Galactic");
-	G4Material* tankMat = man->FindOrBuildMaterial("G4_STAINLESS-STEEL");
-	G4Material* detMat = man->FindOrBuildMaterial("G4_Pyrex_Glass");
-
+	G4NistManager* matMan = G4NistManager::Instance();
+	G4Material* airMat = matMan->FindOrBuildMaterial("G4_AIR");
+	G4Material* waterMat = matMan->FindOrBuildMaterial("G4_WATER");
+	G4Material* vacuumMat = matMan->FindOrBuildMaterial("G4_Galactic");
+	G4Material* tankMat = matMan->FindOrBuildMaterial("G4_STAINLESS-STEEL");
+	G4Material* glassMat = matMan->FindOrBuildMaterial("G4_Pyrex_Glass");
+	G4OpticalSurface* photoSurf = new G4OpticalSurface("PhotocathodeSurface");
+	
 	// Photon energy across Hamamatsu R3600 spectral response
 	std::vector<G4double> photonEnergy = {1.9074 * eV, 2.1377 * eV, 2.4311 * eV, 2.8178 * eV, 3.3509 * eV, 4.1328 * eV};
 	// Index of refraction for all optical materials
@@ -26,17 +26,21 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 
 	auto mptAir = new G4MaterialPropertiesTable();
 	mptAir->AddProperty("RINDEX", photonEnergy, rIndexAir);
-	air->SetMaterialPropertiesTable(mptAir);
+	airMat->SetMaterialPropertiesTable(mptAir);
 	auto mptWater = new G4MaterialPropertiesTable();
 	mptWater->AddProperty("RINDEX", photonEnergy, rIndexWater);
 	mptWater->AddProperty("ABSLENGTH", photonEnergy, absLengthWater);
-	water->SetMaterialPropertiesTable(mptWater);
+	waterMat->SetMaterialPropertiesTable(mptWater);
 	auto mptGlass = new G4MaterialPropertiesTable();
 	mptGlass->AddProperty("RINDEX", photonEnergy, rIndexGlass);
-	detMat->SetMaterialPropertiesTable(mptGlass);
+	glassMat->SetMaterialPropertiesTable(mptGlass);
 	auto mptPhotocathode = new G4MaterialPropertiesTable();
 	mptPhotocathode->AddProperty("REFLECTIVITY", photonEnergy, photocathodeReflectivity);
 	mptPhotocathode->AddProperty("EFFICIENCY", photonEnergy, photocathodeEfficiency);
+	photoSurf->SetType(dielectric_metal);
+	photoSurf->SetModel(unified);
+	photoSurf->SetFinish(polished);
+	photoSurf->SetMaterialPropertiesTable(mptPhotocathode);
 
 // Initialize world, tank, and water
 	
@@ -47,61 +51,62 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	G4double tank_ir = 16.9 * m;
 	G4double tank_w = 2.5 * m;
 	G4double tank_or = tank_ir + tank_w;
-	G4double tank_hh = world_hz;
+	G4double tank_hh = 18.1 * m;
 
 	G4Box* worldSol = new G4Box("solidWorld", world_hx, world_hy, world_hz);
-	G4LogicalVolume* worldLog = new G4LogicalVolume(worldSol, air, "logicWorld");
+	G4LogicalVolume* worldLog = new G4LogicalVolume(worldSol, airMat, "logicWorld");
 	G4VPhysicalVolume* worldPhys = new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), worldLog, "physWorld", 0, false, checkOverlaps);
 
 	G4Tubs* tankBarSol = new G4Tubs("solidTankBarrel", tank_ir, tank_or, tank_hh, 0., 360. * deg);
 	G4LogicalVolume* tankBarLog = new G4LogicalVolume(tankBarSol, tankMat, "logicTankBarrel");
 //	new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), tankBarLog, "physTankBarrel", worldLog, false, 0, checkOverlaps);
 
-	G4Tubs* tankCapSol = new G4Tubs("solidTankCap", 0, tank_ir, (tank_w / 2), 0., 360. * deg);
+	G4Tubs* tankCapSol = new G4Tubs("solidTankCap", 0, tank_or, (tank_w / 2), 0., 360. * deg);
 	G4LogicalVolume* tankCapLog = new G4LogicalVolume(tankCapSol, tankMat, "logicTankCap");
-//	new G4PVPlacement(0, G4ThreeVector(0., 0., (tank_hh - tank_w / 2)), tankCapLog, "physTankCeiling", worldLog, false, 0, checkOverlaps);
-//	new G4PVPlacement(0, G4ThreeVector(0., 0., -(tank_hh - tank_w / 2)), tankCapLog, "physTankFloor", worldLog, false, 0, checkOverlaps);
+//	new G4PVPlacement(0, G4ThreeVector(0., 0., (tank_hh + tank_w / 2)), tankCapLog, "physTankCeiling", worldLog, false, 0, checkOverlaps);
+//	new G4PVPlacement(0, G4ThreeVector(0., 0., -(tank_hh + tank_w / 2)), tankCapLog, "physTankFloor", worldLog, false, 0, checkOverlaps);
 
 	G4Tubs* waterSol = new G4Tubs("solidWater", 0., tank_ir, tank_hh, 0., 360. * deg);
-	G4LogicalVolume* waterLog = new G4LogicalVolume(waterSol, water, "logicWater");
-	new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), waterLog, "physWater", worldLog, false, checkOverlaps);
+	G4LogicalVolume* waterLog = new G4LogicalVolume(waterSol, waterMat, "logicWater");
+//	new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), waterLog, "physWater", worldLog, false, checkOverlaps);
 
 // Initialize Detectors
 
 	// Photomultiplier tube dimensions
 	G4double det_r = 25. * cm;
 	G4double det_wall = 2. * cm;
-	G4double vac_r = det_r - det_wall;
 
+	// Initialize PMT Logical Volume
+	PMTConstruction* pmt = new PMTConstruction(glassMat, vacuumMat, tankMat, photoSurf, det_r, det_wall);
+	G4LogicalVolume* PMTLogicalVolume = pmt->getLogicalVolume();
+	pmtLog = PMTLogicalVolume;
+
+	// Trial placement
+	new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), PMTLogicalVolume, "physPMT", waterLog, false, 0, checkOverlaps); 
+/*
 	// Create glass sphere
 	G4Sphere* glassSol = new G4Sphere("solidGlassPMT", 0., det_r, 0., 360. * deg, 0., 360. * deg);
 	G4LogicalVolume* glassLog = new G4LogicalVolume(glassSol, detMat, "logicGlassPMT");
-	logicGlass = glassLog;
 
 	// Create vacuum inside PMT
 	G4Sphere* vacSol = new G4Sphere("solidVacuumPMT", 0., vac_r, 0., 360. * deg, 0., 360. * deg);
 	G4LogicalVolume* vacLog = new G4LogicalVolume(vacSol, vacuum, "logicVacuumPMT");
 	new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), vacLog, "physVacuumPMT", glassLog, false, 0, checkOverlaps);
 
-	// Create photocathode on glass-vacuum boundary
-	G4OpticalSurface* pmtOpSurf = new G4OpticalSurface("PhotocathodeSurface");
-	pmtOpSurf->SetType(dielectric_metal);
-	pmtOpSurf->SetModel(unified);
-	pmtOpSurf->SetFinish(polished);
-	pmtOpSurf->SetMaterialPropertiesTable(mptPhotocathode);
-
 	new G4LogicalSkinSurface("PhotocathodeSkin", vacLog, pmtOpSurf);
-
+*/
+/*
 	G4double placementRadius = tank_ir - det_r;
-	G4double dAngle = 2. * deg;
+	G4double dAngle = 3. * deg;
 	G4double dSpace = 60. * cm;
 	G4double zStart = -tank_hh + (30. * cm);
 	G4int nPerRing = static_cast<G4int>(std::round(360 * deg / dAngle));
 	G4int nRings = static_cast<G4int>(std::floor((2. * (tank_hh - 30. * cm)) / dSpace)) + 1;
 	G4int nBarrelPMTs = nRings * nPerRing;
 
-	G4int nCapPMTs = 2210;
 	G4int nPerY[] = {11, 19, 23, 27, 29, 31, 35, 39, 39, 41, 41, 43, 45, 47, 47, 49, 49, 51, 51, 51, 51, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 51, 51, 51, 51, 49, 49, 47, 47, 45, 43, 41, 41, 39, 39, 35, 31, 29, 27, 23, 19, 11};
+	G4int nCapPMTs = 0;
+	for (int i = 0; i < 53; i++) nCapPMTs += nPerY[i];
 	G4int cumOffsetTop[53];
 	G4int cumOffsetBot[53];
 	cumOffsetTop[0] = nBarrelPMTs;
@@ -112,9 +117,11 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 		cumOffsetBot[i] = cumOffsetTop[i] + nCapPMTs;
 	}
 	G4double xStart = -15.6 * m;
-	G4double zCap = -22.25 * m;
+	G4double zCap = tank_hh - det_r; 
 
 	G4int totalPMTs = nBarrelPMTs + 2 * nCapPMTs;
+
+	G4cout << totalPMTs << G4endl << nBarrelPMTs << G4endl << nCapPMTs << G4endl;
 
 	auto* tankParam = new PMTParameterisation(placementRadius, 
 						  dAngle, 
@@ -129,7 +136,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 						  cumOffsetTop,
 						  cumOffsetBot);
 	new G4PVParameterised("physDetector", glassLog, waterLog, kUndefined, totalPMTs, tankParam, checkOverlaps);
-
+*/
 	// Set vis attributes
 	G4VisAttributes* waterVisAtt = new G4VisAttributes(G4Color(0., 0.8, 0.8, 0.25));
 	waterVisAtt->SetForceSolid(true);
@@ -140,12 +147,13 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	tankCapLog->SetVisAttributes(tankVisAtt);
 	G4VisAttributes* detVisAtt = new G4VisAttributes(G4Color(0.8, 0.8, 0., 0.5));
 	detVisAtt->SetForceSolid(true);
-	glassLog->SetVisAttributes(detVisAtt);
+	PMTLogicalVolume->SetVisAttributes(detVisAtt);
+//	vacLog->SetVisAttributes(G4VisAttributes::GetInvisible());
 
 	return worldPhys;
 }
 void DetectorConstruction::ConstructSDandField() {
 	SensitiveDetector* sensDet = new SensitiveDetector("SensitiveDetector");
-	logicGlass->SetSensitiveDetector(sensDet);
+	pmtLog->SetSensitiveDetector(sensDet);
 	G4SDManager::GetSDMpointer()->AddNewDetector(sensDet);
 }

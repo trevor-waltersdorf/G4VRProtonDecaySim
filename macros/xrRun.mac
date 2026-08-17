@@ -1,0 +1,23 @@
+/control/verbose 0
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+/process/verbose 0
+/process/em/verbose 0
+/process/had/verbose 0
+
+/run/initialize
+
+/vis/viewer/set/style wireframe
+
+/vis/drawVolume
+/vis/scene/add/trajectories
+
+#/vis/filtering/trajectories/create/particleFilter
+#/vis/filtering/trajectories/particleFilter-0/add opticalphoton
+#/vis/filtering/trajectories/particleFilter-0/invert true
+
+/Xr/session espresso
+/vis/open Xr
+
+/run/beamOn 1

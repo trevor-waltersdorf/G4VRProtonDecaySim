@@ -66,7 +66,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
 		G4double Ep = sqrt(pow(pf, 2) + pow(mProt, 2));
 	
 		// Obtain boost vector
-		G4ThreeVector pF(pf * nxF, pf * nyF, pf * nxF);
+		G4ThreeVector pF(pf * nxF, pf * nyF, pf * nzF);
 		G4ThreeVector beta = pF / Ep;
 
 		// Apply the boost to bring CM 4-momenta to lab frame
