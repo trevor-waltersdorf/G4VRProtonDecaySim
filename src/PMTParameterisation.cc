@@ -29,6 +29,8 @@ PMTParameterisation::PMTParameterisation(
 
 void PMTParameterisation::ComputeTransformation(const G4int copyNo, G4VPhysicalVolume* physVol) const {
 	G4double x, y, z;
+	G4RotationMatrix* rotMatrix = new G4RotationMatrix();
+
 	if (copyNo < fNPerBarrel) {
 		G4int ringIndex = copyNo / fNPerRing;
 		G4int angIndex = copyNo % fNPerRing;
@@ -37,6 +39,7 @@ void PMTParameterisation::ComputeTransformation(const G4int copyNo, G4VPhysicalV
 		z = fZStart + ringIndex * fDSpace;
 		x = fPlacementRadius * std::cos(angle);
 		y = fPlacementRadius * std::sin(angle);
+		rotMatrix->rotateZ(-angle);
 	} else if (copyNo < fNPerBarrel + fNPerCap) {
 		auto it = std::upper_bound(fCumOffsetTop, fCumOffsetTop + 53, copyNo);
 		G4int xIndex = (it - fCumOffsetTop) - 1;
@@ -47,6 +50,7 @@ void PMTParameterisation::ComputeTransformation(const G4int copyNo, G4VPhysicalV
 		x = fXStart + fDSpace * xIndex;
 		y = yStart + fDSpace * yIndex;
 		z = fZCap;
+		rotMatrix->rotateY(90. * deg);
 	} else {
 		auto it = std::upper_bound(fCumOffsetBot, fCumOffsetBot + 53, copyNo);
 		G4int xIndex = (it - fCumOffsetBot) - 1;
@@ -57,8 +61,9 @@ void PMTParameterisation::ComputeTransformation(const G4int copyNo, G4VPhysicalV
 		x = fXStart + fDSpace * xIndex;
 		y = yStart + fDSpace * yIndex;
 		z = -fZCap;
+		rotMatrix->rotateY(-90. * deg);
 	}
 
 	physVol->SetTranslation(G4ThreeVector(x, y, z));
-	physVol->SetRotation(nullptr); // TODO change when pmt has front
+	physVol->SetRotation(rotMatrix);
 }
