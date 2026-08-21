@@ -22,7 +22,7 @@ G4LogicalVolume* PMTConstruction::getLogicalVolume() {
 	coneRot->rotateY(90. * deg);
 
 	// Initialize glass cover
-	G4Sphere* glassSol = new G4Sphere("solidGlass", vacuumRadius, fRadius, 90. * deg, 180. * deg, 0., 360. * deg);
+	G4Sphere* glassSol = new G4Sphere("solidGlass", 0., fRadius, 90. * deg, 180. * deg, 0., 360. * deg);
 	G4LogicalVolume* glassLog = new G4LogicalVolume(glassSol, fGlassMaterial, "logicalGlass");
 
 	// Place vacuum inside

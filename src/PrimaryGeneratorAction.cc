@@ -10,6 +10,8 @@ PrimaryGeneratorAction::~PrimaryGeneratorAction() {
 }
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
+	G4Random::setTheSeed(time(NULL));
+
 	// Define the pion and positron
 	G4ParticleTable *particleTable = G4ParticleTable::GetParticleTable();
 	G4ParticleDefinition *pi0 = particleTable->FindParticle("pi0");

@@ -67,10 +67,10 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), tankBarLog, "physTankBarrel", worldLog, false, 0, checkOverlaps);
 
 	// Place tank caps
-	G4Tubs* tankCapSol = new G4Tubs("solidTankCap", 0, tank_ir, (tank_w / 2), 0., 360. * deg);
+	G4Tubs* tankCapSol = new G4Tubs("solidTankCap", 0, tank_or, (tank_w / 2), 0., 360. * deg);
 	G4LogicalVolume* tankCapLog = new G4LogicalVolume(tankCapSol, tankMat, "logicTankCap");
-	new G4PVPlacement(0, G4ThreeVector(0., 0., (tank_hh - tank_w / 2)), tankCapLog, "physTankCeiling", worldLog, false, 0, checkOverlaps);
-	new G4PVPlacement(0, G4ThreeVector(0., 0., -(tank_hh - tank_w / 2)), tankCapLog, "physTankFloor", worldLog, false, 0, checkOverlaps);
+	new G4PVPlacement(0, G4ThreeVector(0., 0., (tank_hh + tank_w / 2)), tankCapLog, "physTankCeiling", worldLog, false, 0, checkOverlaps);
+	new G4PVPlacement(0, G4ThreeVector(0., 0., -(tank_hh + tank_w / 2)), tankCapLog, "physTankFloor", worldLog, false, 0, checkOverlaps);
 
 	// Fill tank with water
 	G4Tubs* waterSol = new G4Tubs("solidWater", 0., tank_ir, tank_hh, 0., 360. * deg);

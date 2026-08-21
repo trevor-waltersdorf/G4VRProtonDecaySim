@@ -11,6 +11,7 @@
 #include "G4ThreeVector.hh"
 #include "Randomize.hh"
 #include <cmath>
+#include <time.h>
 
 class EventAction;
 

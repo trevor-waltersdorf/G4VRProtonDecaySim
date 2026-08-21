@@ -4,6 +4,15 @@ EventAction::EventAction(RunAction* runAction) : fRunAction(runAction) {}
 
 void EventAction::BeginOfEventAction(const G4Event*) {
 	fEdep = 0.;
+	
+	// Get current date and time
+	std::time_t now = std::time(nullptr);
+    	std::tm* localTime = std::localtime(&now);
+    	char buffer[16];
+    	std::strftime(buffer, sizeof(buffer), "%Y%m%d%H%M%S", localTime);
+
+	// Set name of run to YYMMDDHHMMSS format
+	fRunName = std::string(buffer);
 }
 
 void EventAction::EndOfEventAction(const G4Event* event) {
@@ -15,16 +24,10 @@ void EventAction::EndOfEventAction(const G4Event* event) {
 	auto hc = static_cast<HitCollection*>(event->GetHCofThisEvent()->GetHC(hcID));
 	
 //Save each hit to csv
-	// Get current date and time
-	std::time_t now = std::time(nullptr);
-    	std::tm* localTime = std::localtime(&now);
-    	char buffer[16];
-    	std::strftime(buffer, sizeof(buffer), "%Y%m%d%H%M%S", localTime);
 
-	// Set name of run to YYMMDDHHMMSS format
-	std::string runName(buffer);
-	std::string fileName = runName + ".csv";
-	std::filesystem::path dirPath("../data/" + runName);
+	// Set name of data storage to run name
+	std::string fileName = fRunName + ".csv";
+	std::filesystem::path dirPath("../data/" + fRunName);
 	std::filesystem::path filePath = dirPath / fileName;
 	std::filesystem::create_directories(dirPath);
 	std::ofstream Output(filePath);

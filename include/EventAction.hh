@@ -32,6 +32,7 @@ class EventAction : public G4UserEventAction
 
   private:
     RunAction* fRunAction = nullptr;
+    std::string fRunName;
     G4double fEdep = 0.;
     G4bool isFreeProton = true;
     G4double openAng = 0.;
